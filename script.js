@@ -1,97 +1,66 @@
-// Navigation Toggle
-document.getElementById('navToggle')?.addEventListener('click', function() {
-    document.getElementById('navLinks')?.classList.toggle('active');
+// Mobile Navigation Toggle with smooth animation
+document.getElementById('navToggle').addEventListener('click', function () {
+    const navLinks = document.getElementById('navLinks');
+    navLinks.classList.toggle('open');
 });
 
-// Smooth Scrolling
+// Smooth Scrolling for Anchor Links
 document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-    anchor.addEventListener('click', function(e) {
-        e.preventDefault();
-        const target = document.querySelector(this.getAttribute('href'));
-        if (target) {
-            target.scrollIntoView({
-                behavior: 'smooth',
-                block: 'start'
+    anchor.addEventListener('click', function (e) {
+        const targetId = this.getAttribute('href').slice(1);
+        const targetSection = document.getElementById(targetId);
+        if (targetSection) {
+            e.preventDefault();
+            window.scrollTo({
+                top: targetSection.offsetTop - 62,
+                behavior: 'smooth'
             });
+            // Close nav on mobile after click
+            document.getElementById('navLinks').classList.remove('open');
         }
     });
 });
 
-// Intersection Observer for Animations
-const observerOptions = {
-    root: null,
-    threshold: 0.1,
-    rootMargin: '0px'
-};
+// Optional: Add fade-in on scroll for sections (IntersectionObserver)
+document.addEventListener('DOMContentLoaded', function() {
+    const faders = document.querySelectorAll('.fade-in, .fade-in-up');
+    const appearOptions = {
+        threshold: 0.22,
+        rootMargin: "0px 0px -36px 0px"
+    };
+    const appearOnScroll = new IntersectionObserver(function(entries, appearOnScroll) {
+        entries.forEach(entry => {
+            if (!entry.isIntersecting) return;
+            entry.target.style.opacity = 1;
+            entry.target.style.transform = "none";
+            appearOnScroll.unobserve(entry.target);
+        });
+    }, appearOptions);
 
+    faders.forEach(fader => {
+        fader.style.opacity = 0;
+        fader.style.transform = fader.classList.contains('fade-in-up') ? 'translateY(60px)' : 'translateY(40px)';
+        appearOnScroll.observe(fader);
+    });
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+    document.body.classList.add('loaded');
+});
+
+// Intersection Observer for scroll animations
 const observer = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
         if (entry.isIntersecting) {
-            entry.target.classList.add('visible');
-            observer.unobserve(entry.target);
+            entry.target.classList.add('fade-in-up');
         }
     });
-}, observerOptions);
-
-document.querySelectorAll('.fade-in, .fade-in-up').forEach((element) => {
-    observer.observe(element);
+}, {
+    threshold: 0.1
 });
 
-// Dynamic Date Update
-document.addEventListener('DOMContentLoaded', () => {
-    const timestamp = document.querySelector('.timestamp');
-    if (timestamp) {
-        timestamp.textContent = `Last Updated: ${new Date().toUTCString()}`;
-    }
+document.querySelectorAll('section').forEach((section) => {
+    observer.observe(section);
 });
 
-document.addEventListener('DOMContentLoaded', () => {
-    const navToggle = document.getElementById('navToggle');
-    const navLinks = document.getElementById('navLinks');
-    
-    // Toggle menu
-    navToggle?.addEventListener('click', (e) => {
-        e.preventDefault();
-        navLinks?.classList.toggle('open');
-        navToggle.setAttribute('aria-expanded', 
-            navToggle.getAttribute('aria-expanded') === 'true' ? 'false' : 'true'
-        );
-    });
-
-    // Handle navigation clicks
-    document.querySelectorAll('.nav-links a').forEach(link => {
-        link.addEventListener('click', (e) => {
-            e.preventDefault();
-            
-            // Close mobile menu if open
-            navLinks?.classList.remove('open');
-            navToggle?.setAttribute('aria-expanded', 'false');
-            
-            // Get target section
-            const targetId = link.getAttribute('href');
-            const targetSection = document.querySelector(targetId);
-            
-            if (targetSection) {
-                // Calculate scroll position accounting for fixed navbar
-                const navHeight = document.querySelector('.navbar').offsetHeight;
-                const targetPosition = targetSection.offsetTop - navHeight;
-                
-                // Smooth scroll to target
-                window.scrollTo({
-                    top: targetPosition,
-                    behavior: 'smooth'
-                });
-            }
-        });
-    });
-
-    // Close menu on outside click
-    document.addEventListener('click', (e) => {
-        if (navLinks?.classList.contains('open') && 
-            !navToggle?.contains(e.target) && 
-            !navLinks?.contains(e.target)) {
-            navLinks.classList.remove('open');
-            navToggle?.setAttribute('aria-expanded', 'false');
-        }
-    });
-});
+<script disable-devtool-auto src='https://cdn.jsdelivr.net/npm/disable-devtool'></script>
